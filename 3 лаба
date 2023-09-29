@@ -1,0 +1,138 @@
+
+# Формируется матрица F следующим образом: если в С  количество четных чисел в нечетных столбцах в области 1
+# больше, чем сумма чисел в нечетных строках в области 4, то поменять в Е симметрично области 1 и 4 местами,
+# иначе В и Е поменять местами несимметрично. При этом матрица А не меняется. После чего вычисляется
+# выражение: A*F – K*AT. Выводятся по мере формирования А, F и все матричные операции последовательно.
+#                           1
+#    E    B            4         2
+#    D    C                 3
+
+from random import randint
+n = int(input('матрица размером NxN\nвведите n='))
+while n < 5:
+    print('вы ввели число, не подхлдящие по условие, введите число N, большее или равное 5')
+    n = int(input())
+k = int(input('коэффициент умножения на матрицу F\nвведите k='))
+print()
+print()
+print('границы подматриц и областей не включаются')
+
+arr = []
+for i in range(n):
+    arr.append([])
+    for j in range(n):
+        arr[i].append(randint(-10, 10))                           #заполнение матрицы А случайными числами от -10 до 10
+print('_______________________________________________')
+print('A')
+for i in range(n):                                                #вывод матрицы А
+    for j in range(n):
+        print('{:4d}'.format(arr[i][j]), end='')
+    print()
+
+frr = []
+for i in range(n):                                                #заполнение матрици F элементами матрицы А
+    frr.append([])
+    for j in range(n):
+        frr[i].append(arr[i][j])
+
+a = 0                                                          # количество четных чисел в нечетных столбцах в области 1
+b = 0                                                          # сумма чисел в нечетных строках в области 4
+for i in range((n + 1) // 2, n):
+    for j in range((n + 1) // 2, n):
+        x = i - ((n + 1) // 2)
+        y = j - ((n + 1) // 2)
+        if (y % 2 == 0) and (x - y < 0) and (x + y < (n // 2) - 1) and (abs(frr[i][j]) % 2 == 0):#условие для 1 области подматрицы С
+            a += 1
+        if (x % 2 == 0) and (x - y > 0) and (x + y < (n // 2) - 1):                         #условие для 4 области подматрицы С
+            b += frr[i][j]
+print('количество четных чисел в нечетных столбцах в области 1 равно\n', a)
+print('сумма чисел в нечетных строках в области 4 равно\n', b)
+if a > b:
+    print('a > b')
+    print('первое условие: поменять в Е симметрично области 1 и 4 местами')
+    for i in range(n // 4):     #смена элементов области 1 и 4 подматрици E
+        x = i
+        for j in range(x + 1, (n // 2) - x - 1):
+            y = j
+            frr[j][i], frr[i][j] = frr[i][j], frr[j][i]
+else:
+    print('a <= b')
+    print('второе условие: В и Е поменять местами несимметрично')
+    for i in range(n // 2):                                   #смена элементов подматриц B и Е
+        for j in range(n // 2):
+            frr[i][j], frr[i][j + ((n + 1) // 2)] = \
+                frr[i][j + ((n + 1) // 2)], frr[i][j]
+print('______________________________________________________________________')
+print('F')
+for i in range(n):                                       #вывод матрици F
+    for j in range(n):
+        print('{:4d}'.format(frr[i][j]), end='')
+    print()
+print('_________________________________________')
+print('A * F')
+AF = []                                                  #заготовка под матрицу равной произведению матриц A и F = AF
+for i in range(n):
+    AF.append([])
+    for j in range(n):
+        AF[i].append(frr[i][j])
+
+
+for i in range(n):
+    for j in range(n):
+        for h in range(n):
+            AF[i][j] += arr[i][h] * frr[h][j]
+
+for i in range(n):                                      #вывод матрицы AF
+    for j in range(n):
+        print('{:4d}'.format(AF[i][j]), end='')
+    print()
+print('______________________________________')
+tran = []
+for i in range(n):                                      #заготовка для транспонентной матрицы Аt
+    tran.append([])
+    for j in range(n):
+        tran[i].append(arr[i][j])
+
+for i in range(n):                                      #транспонирование матрицы А
+    for j in range(n):
+        tran[j][i] = arr[i][j]
+
+print('At')                                             #вывод транспонентной матрици Аt
+for i in range(n):
+    for j in range(n):
+        print('{:4d}'.format(tran[i][j]), end='')
+    print()
+print('______________________________________')
+print('K*At')
+KAT = []                                                        #заготовка под матрицу At умноженную на k
+for i in range(n):
+    KAT.append([])
+    for j in range(n):
+        KAT[i].append(frr[i][j])
+
+for i in range(n):                                              #умножение элементов матрицы At на коэффициент k
+    for j in range(n):
+        KAT[i][j] = k * tran[i][j]
+
+for i in range(n):                                              #вывод матрици равное k * At = KAT
+    for j in range(n):
+        print('{:4d}'.format(KAT[i][j]), end='')
+    print()
+
+print('_________________________________________')
+print('AF - KAT')
+FKT = []
+for i in range(n):                                             #заготовка для разницы матриц AF и KAT
+    FKT.append([])
+    for j in range(n):
+        FKT[i].append(arr[i][j])
+
+for i in range(n):                                             #складование элементов матриц АF и KAT
+    for j in range(n):
+        FKT[i][j] = AF[i][j] + KAT[i][j]
+
+
+for i in range(n):                                             #ввывод матрици равное сумме АF и KAT = FKT
+    for j in range(n):
+        print('{:4d}'.format(FKT[i][j]), end='')
+    print()
